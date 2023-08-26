@@ -18,7 +18,7 @@ public struct MetaEnumMacro {
 
     parentTypeName = enumDecl.name.with(\.trailingTrivia, [])
 
-    access = enumDecl.modifiers?.first(where: \.isNeededAccessLevelModifier)
+    access = enumDecl.modifiers.first(where: \.isNeededAccessLevelModifier)
 
     childCases = enumDecl.caseElements.map { parentCase in
       parentCase.with(\.parameterClause, nil)

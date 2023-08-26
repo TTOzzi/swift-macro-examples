@@ -65,18 +65,16 @@ public struct AddAsyncMacro: PeerMacro {
 
     
     // Drop the @addAsync attribute from the new declaration.
-    let newAttributeList = AttributeListSyntax(
-      funcDecl.attributes?.filter {
-        guard case let .attribute(attribute) = $0,
-              let attributeType = attribute.attributeName.as(IdentifierTypeSyntax.self),
-              let nodeType = node.attributeName.as(IdentifierTypeSyntax.self)
-        else {
-          return true
-        }
-        
-        return attributeType.name.text != nodeType.name.text
-      } ?? []
-    )
+    let newAttributeList = funcDecl.attributes.filter {
+      guard case let .attribute(attribute) = $0,
+            let attributeType = attribute.attributeName.as(IdentifierTypeSyntax.self),
+            let nodeType = node.attributeName.as(IdentifierTypeSyntax.self)
+      else {
+        return true
+      }
+      
+      return attributeType.name.text != nodeType.name.text
+    }
     
     let callArguments: [String] = newParameterList.map { param in
       let argName = param.secondName ?? param.firstName
@@ -102,10 +100,10 @@ public struct AddAsyncMacro: PeerMacro {
     let newBody: ExprSyntax =
       """
       
-        \(isResultReturn ? "try await withCheckedThrowingContinuation { continuation in" : "await withCheckedContinuation { continuation in")
-          \(funcDecl.name)(\(raw: callArguments.joined(separator: ", "))) { \(returnType != nil ? "returnValue in" : "")
+        \(literal: isResultReturn ? "try await withCheckedThrowingContinuation { continuation in" : "await withCheckedContinuation { continuation in")
+          \(funcDecl.name)(\(raw: callArguments.joined(separator: ", "))) { \(literal: returnType != nil ? "returnValue in" : "")
         
-          \(isResultReturn ? switchBody : "continuation.resume(returning: \(returnType != nil ? "returnValue" : "()"))")
+          \(isResultReturn ? switchBody : "continuation.resume(returning: \(literal: returnType != nil ? "returnValue" : "()"))")
             
           }
         }

@@ -90,7 +90,7 @@ public struct ObservationRegistrar<Subject: Observable> {
 
 @attached(member, names: named(Storage), named(_storage), named(_registrar), named(addObserver), named(removeObserver), named(withTransaction))
 @attached(memberAttribute)
-@attached(conformance)
+@attached(extension)
 public macro Observable() = #externalMacro(module: "MacroExamplesPlugin", type: "ObservableMacro")
 
 @attached(accessor)
@@ -145,5 +145,5 @@ public macro CustomCodable() = #externalMacro(module: "MacroExamplesPlugin", typ
 ///       }
 ///     }
 @attached(member, names: arbitrary)
-@attached(conformance)
+@attached(extension)
 public macro MyOptionSet<RawType>() = #externalMacro(module: "MacroExamplesPlugin", type: "OptionSetMacro")

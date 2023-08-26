@@ -118,14 +118,16 @@ public struct OptionSetMacro {
   }
 }
 
-extension OptionSetMacro: ConformanceMacro {
+extension OptionSetMacro: ExtensionMacro {
   public static func expansion(
-    of attribute: AttributeSyntax,
-    providingConformancesOf decl: some DeclGroupSyntax,
+    of node: AttributeSyntax,
+    attachedTo declaration: some DeclGroupSyntax,
+    providingExtensionsOf type: some TypeSyntaxProtocol,
+    conformingTo protocols: [SwiftSyntax.TypeSyntax], 
     in context: some MacroExpansionContext
-  ) throws -> [(TypeSyntax, GenericWhereClauseSyntax?)] {
+  ) throws -> [ExtensionDeclSyntax] {
     // Decode the expansion arguments.
-    guard let (structDecl, _, _) = decodeExpansion(of: attribute, attachedTo: decl, in: context) else {
+    guard let (structDecl, _, _) = decodeExpansion(of: node, attachedTo: declaration, in: context) else {
       return []
     }
 
@@ -134,8 +136,9 @@ extension OptionSetMacro: ConformanceMacro {
        inheritedTypes.contains(where: { inherited in inherited.type.trimmedDescription == "OptionSet" }) {
       return []
     }
-
-    return [("OptionSet", nil)]
+    
+    let ext: DeclSyntax = "extension \(type.trimmed): OptionSet {}"
+    return [ext.cast(ExtensionDeclSyntax.self)]
   }
 }
 
@@ -160,7 +163,7 @@ extension OptionSetMacro: MemberMacro {
     }
 
     // Dig out the access control keyword we need.
-    let access = decl.modifiers?.first(where: \.isNeededAccessLevelModifier)
+    let access = decl.modifiers.first(where: \.isNeededAccessLevelModifier)
 
     let staticVars = caseElements.map { (element) -> DeclSyntax in
       """
